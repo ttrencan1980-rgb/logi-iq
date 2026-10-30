@@ -237,9 +237,12 @@ function obrObnova() {
       <p>1. Zadaj svoj e-mail a pošli si odkaz na obnovu.</p>
       <label for="o-email">E-mail</label><input id="o-email" type="email" autocomplete="username" value="${esc(o.email ?? "")}">
       ${btn("posliObnovu", o.odoslane ? "Poslať znova" : "Poslať e-mail na obnovu", "sekundarne")}
-      <p>2. V e-maile <b>na odkaz neklikaj</b>. Klikni naň pravým tlačidlom → <b>Kopírovať adresu odkazu</b> a vlož ho sem.</p>
-      <label for="o-odkaz">Odkaz z e-mailu</label><textarea id="o-odkaz" rows="3" autocomplete="off" spellcheck="false"></textarea>
-      <button class="hlavne" type="submit">Pokračovať</button>
+      <p>2. V e-maile klikni na <b>„Reset Password“</b>. Otvorí sa táto appka a vypýta si nové heslo.</p>
+      <details class="mensie" ${o.rucne ? "open" : ""}><summary>Odkaz sa neotvoril v appke?</summary>
+        <p>Klikni na „Reset Password“ pravým tlačidlom → <b>Kopírovať adresu odkazu</b> a vlož ho sem.</p>
+        <label for="o-odkaz">Odkaz z e-mailu</label><textarea id="o-odkaz" rows="3" autocomplete="off" spellcheck="false"></textarea>
+        <button class="hlavne" type="submit">Pokračovať</button>
+      </details>
       ${btn("spatPrihlasenie", "Späť na prihlásenie", "sekundarne")}
     </form>`;
 }
@@ -454,7 +457,7 @@ document.addEventListener("submit", async (e) => {
   if (f === "prijem") return A.ulozPrijem();
   if (f === "inventura") return A.ulozInventuru();
   if (f === "bot-skus") return A.skusRobota();
-  if (f === "obnova-odkaz") { const odkaz = $("#o-odkaz").value; return rob(async () => { const v = await api.obnovZOdkazu(odkaz); S.obnova.faza = v.potrebujeMfa ? "mfa" : "heslo"; }); }
+  if (f === "obnova-odkaz") { const odkaz = $("#o-odkaz").value; S.obnova.rucne = true; return rob(async () => { const v = await api.obnovZOdkazu(odkaz); S.obnova.faza = v.potrebujeMfa ? "mfa" : "heslo"; }); }
   if (f === "obnova-mfa") { const kod = $("#o-mfa").value; return rob(async () => { await api.overMfaBezProfilu(kod); S.obnova.faza = "heslo"; }); }
   if (f === "obnova-heslo") {
     const h1 = $("#o-h1").value, h2 = $("#o-h2").value;
@@ -471,6 +474,10 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) zasta
 (async () => {
   try {
     api = ukazka ? ukazkovaApi() : await zivaApi(CONFIG);
+    let obnova = null;
+    try { obnova = await api.obnovaZUrl(); }
+    catch (e) { S.obnova = { faza: "odkaz" }; S.obr = "obnova"; render(); hlas("chyba", e.message); return; }
+    if (obnova) { S.obnova = { faza: obnova.potrebujeMfa ? "mfa" : "heslo" }; S.obr = "obnova"; render(); return; }
     const p = await api.pouzivatel();
     if (p) { S.pouzivatel = p; await A.domov(); } else render();
   } catch (e) {

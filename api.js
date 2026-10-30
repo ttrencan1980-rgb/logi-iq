@@ -16,7 +16,11 @@ const norm = (s) => String(s ?? "").trim().toUpperCase();
 
 export async function zivaApi(config) {
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm");
-  const sb = createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true } });
+  // Odkaz „Reset Password“ z e-mailu otvorí appku s #access_token…&type=recovery; zachytiť skôr, než ho klient spracuje
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const prisielOdkaz = hash.get("type") === "recovery" || !!hash.get("error_description");
+  const chybaOdkazu = hash.get("error_description");
+  const sb = createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
 
   const ok = ({ data, error }) => {
     if (error) throw new Error(error.message || "Chyba spojenia so serverom.");
@@ -41,6 +45,19 @@ export async function zivaApi(config) {
 
   return {
     rezim: "ziva",
+    // stav po kliknutí na odkaz v e-maile: null = bežné otvorenie
+    async obnovaZUrl() {
+      if (!prisielOdkaz) return null;
+      history.replaceState(null, "", location.pathname + location.search);   // tokeny preč z adresy
+      if (chybaOdkazu) throw new Error("Odkaz z e-mailu už neplatí (" + chybaOdkazu + "). Pošli si nový cez „Zabudnuté heslo“.");
+      for (let i = 0; i < 20; i++) {                                         // klient si reláciu z odkazu načíta asynchrónne
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) break;
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      const aal = ok(await sb.auth.mfa.getAuthenticatorAssuranceLevel());
+      return { potrebujeMfa: aal.nextLevel === "aal2" && aal.currentLevel !== "aal2" };
+    },
     async pouzivatel() {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) return null;
@@ -61,7 +78,10 @@ export async function zivaApi(config) {
     async odhlas() { profil = null; await sb.auth.signOut(); },
 
     // Zabudnuté heslo: e-mail s odkazom → používateľ odkaz SKOPÍRUJE (neotvára) a vloží do appky
-    async posliObnovu(email) { ok(await sb.auth.resetPasswordForEmail(email.trim())); },
+    async posliObnovu(email) {
+      const spat = location.protocol === "https:" ? location.origin + location.pathname : undefined;   // odkaz v e-maile otvorí túto appku
+      ok(await sb.auth.resetPasswordForEmail(email.trim(), spat ? { redirectTo: spat } : {}));
+    },
     async obnovZOdkazu(text) {
       const t = String(text).trim();
       let u; try { u = new URL(t); } catch { throw new Error("Toto nie je odkaz. Skopíruj celý odkaz z e-mailu (pravým tlačidlom → Kopírovať adresu odkazu)."); }
@@ -218,6 +238,7 @@ export function ukazkovaApi() {
     async overMfa() { return { meno: "Mária", rola: "skladnik" }; },
     async odhlas() {},
     async posliObnovu() { throw new Error("V ukážke sa heslo neobnovuje."); },
+    async obnovaZUrl() { return null; },
     async obnovZOdkazu() { throw new Error("V ukážke sa heslo neobnovuje."); },
     async overMfaBezProfilu() {},
     async nastavHeslo() { throw new Error("V ukážke sa heslo neobnovuje."); },
