@@ -160,6 +160,7 @@ const A = {
   },
   hladaj() { S.hladat = null; prejdi("hladat"); },
   zabudnute() { S.obnova = { faza: "odkaz", email: $("#email")?.value ?? "" }; prejdi("obnova"); },
+  zmenHeslo() { S.obnova = { faza: "heslo", prihlaseny: true }; prejdi("obnova"); },
   spatPrihlasenie() { S.obnova = null; prejdi("prihlasenie"); },
   async posliObnovu() {
     const email = $("#o-email").value.trim();
@@ -230,7 +231,8 @@ function obrObnova() {
       <p class="tlmene">Aspoň 10 znakov. Heslo nikomu neposielaj, ani do chatu.</p>
       <label for="o-h1">Nové heslo</label><input id="o-h1" type="password" autocomplete="new-password" minlength="10" required>
       <label for="o-h2">Zopakuj heslo</label><input id="o-h2" type="password" autocomplete="new-password" minlength="10" required>
-      <button class="hlavne" type="submit">Uložiť heslo a prihlásiť sa</button>
+      <button class="hlavne" type="submit">${o.prihlaseny ? "Uložiť nové heslo" : "Uložiť heslo a prihlásiť sa"}</button>
+      ${o.prihlaseny ? btn("domov", "Späť", "sekundarne") : ""}
     </form>`;
   return `<form class="karta" data-form="obnova-odkaz">
       <h1>Zabudnuté heslo</h1>
@@ -260,7 +262,7 @@ function obrUlohy() {
     </section>` : ""}
     <section class="karta akcent">
       <span class="stitok">Teraz</span>
-      <h2>Vychystať ${u.objednavky.length} ${u.objednavky.length === 1 ? "objednávku" : u.objednavky.length < 5 ? "objednávky" : "objednávok"}</h2>
+      <h2>Vychystať ${u.objednavky.length} ${u.objednavky.length === 1 ? "objednávku" : u.objednavky.length >= 2 && u.objednavky.length <= 4 ? "objednávky" : "objednávok"}</h2>
       ${u.objednavky.length ? `<div class="zoznam-obj">${obj}</div>${btn("zacniVlnu", `Začať vlnu (${S.vyber.size})`, "hlavne tmave")}` : `<p>Všetko je vychystané.</p>`}
     </section>
     <div class="mriezka">
@@ -268,6 +270,7 @@ function obrUlohy() {
       ${btn("zacniInventuru", "<b>Inventúra</b><small>jednej pozície</small>", "dlazdica")}
       ${btn("hladaj", "<b>Kde je tovar</b><small>sken alebo kód</small>", "dlazdica")}
     </div>
+    ${btn("zmenHeslo", "Zmeniť heslo", "sekundarne")}
     ${u.expiruju.length ? `<section class="karta varovanie"><h3>Predať prednostne</h3>${u.expiruju.map((e) => `<p><b>${esc(e.nazov)}</b> · šarža ${esc(e.sarza || "—")} · exp. ${datum(e.expiracia)}</p>`).join("")}</section>` : ""}`;
 }
 
@@ -463,7 +466,7 @@ document.addEventListener("submit", async (e) => {
     const h1 = $("#o-h1").value, h2 = $("#o-h2").value;
     if (h1.length < 10) return hlas("chyba", "Heslo musí mať aspoň 10 znakov.");
     if (h1 !== h2) return hlas("chyba", "Heslá sa nezhodujú.");
-    return rob(async () => { S.pouzivatel = await api.nastavHeslo(h1); S.obnova = null; await A.domov(); S.hlasenie = { typ: "ok", text: "Heslo je zmenené. Si prihlásený." }; });
+    return rob(async () => { S.pouzivatel = await api.nastavHeslo(h1); S.obnova = null; await A.domov(); S.hlasenie = { typ: "ok", text: "Heslo je zmenené. Nabudúce sa prihlás novým heslom." }; });
   }
 });
 $("#kamera-btn").addEventListener("click", () => A.kamera());
