@@ -1,0 +1,128 @@
+/* Logi IQ Sklad · mobil. Veľké ciele dotyku (min. 52 px), jedna akcia na obrazovku, svetlá aj tmavá téma. */
+:root {
+  --pozadie: #EEF2F6; --karta: #FFFFFF; --text: #0F1B2D; --tlmene: #4A5B73; --ciara: #C5D0DD;
+  --hlava: #0F1B2D; --hlava-text: #E6EDF7; --akcent: #18C7B3; --akcent-text: #0F1B2D; --akcent-tmavy: #0B6E64;
+  --ok-poz: #E0F7F4; --ok-text: #08544C; --chyba-poz: #FDE8E8; --chyba-text: #9F2424; --chyba-ram: #C93C3C;
+  --var-poz: #FFF4E0; --var-text: #7A4A00;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pozadie: #0B1420; --karta: #15253B; --text: #E6EDF7; --tlmene: #9AABC4; --ciara: #2E4566;
+    --hlava: #070E18; --ok-poz: #103A35; --ok-text: #7FE3D6; --chyba-poz: #4A1F1B; --chyba-text: #FFB4AC;
+    --var-poz: #3F3213; --var-text: #F6CF85; --akcent-tmavy: #18C7B3; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; display: flex; flex-direction: column; background: var(--pozadie); color: var(--text);
+  font: 16px/1.4 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--akcent); outline-offset: 2px; }
+.skryte { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.mono { font-family: var(--mono); }
+.tlmene { color: var(--tlmene); }
+.mensie { font-size: 14px; }
+h1 { font-size: 24px; margin: 4px 0 8px; line-height: 1.2; }
+h2 { font-size: 20px; margin: 6px 0; line-height: 1.25; }
+h3 { font-size: 16px; margin: 0 0 6px; }
+p { margin: 6px 0; }
+
+.hlavicka {
+  background: var(--hlava); color: var(--hlava-text); display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px));
+}
+.logo { font-weight: 700; font-size: 19px; }
+.logo span { color: var(--akcent); }
+.logo small { font-weight: 500; color: #9AABC4; font-size: 14px; }
+.hlavicka-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #9AABC4; min-width: 0; }
+.progres { width: 90px; height: 6px; border-radius: 3px; background: #23364F; overflow: hidden; }
+.progres i { display: block; height: 100%; background: var(--akcent); transition: width .2s; }
+
+.obsah {
+  flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+  padding: 14px max(14px, env(safe-area-inset-right, 0px)) 18px max(14px, env(safe-area-inset-left, 0px));
+}
+.obsah[aria-busy="true"] { opacity: .6; pointer-events: none; }
+.karta { background: var(--karta); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.karta.stred { margin-top: 8vh; }
+.karta.akcent { background: var(--akcent); color: var(--akcent-text); }
+.karta.varovanie { background: var(--var-poz); color: var(--var-text); }
+.stitok { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.pozdrav { margin-top: 2px; }
+.medzi { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-direction: row; }
+.vpravo { text-align: right; }
+.medzi small, .vpravo small, .riadok-obj small { display: block; font-size: 13px; }
+.velke { font-size: 22px; }
+.odznak { font-size: 12px; font-weight: 700; background: var(--var-poz); color: var(--var-text); padding: 2px 8px; border-radius: 999px; }
+
+label { font-weight: 600; font-size: 14px; margin-top: 4px; display: block; }
+input:not([type="checkbox"]) {
+  width: 100%; min-height: 52px; padding: 0 14px; border: 2px solid var(--ciara); border-radius: 14px;
+  background: var(--karta); font-size: 17px;
+}
+input:focus, textarea:focus { border-color: var(--akcent); outline: none; }
+textarea { width: 100%; padding: 12px 14px; border: 2px solid var(--ciara); border-radius: 14px; background: var(--karta); font: inherit; font-size: 16px; color: inherit; resize: vertical; }
+.bot-text, .bot-sprava { white-space: pre-wrap; overflow-wrap: anywhere; }
+.bot-text { background: var(--pozadie); border-radius: 12px; padding: 10px 12px; margin: 0; }
+
+.hlavne, .sekundarne, .nebezpecne, .dlazdica, .krokove {
+  min-height: 56px; border-radius: 16px; border: 0; padding: 0 18px; font-weight: 700; font-size: 17px;
+}
+.hlavne { background: var(--akcent); color: var(--akcent-text); }
+.hlavne.tmave { background: var(--hlava); color: #FFFFFF; }
+.sekundarne { background: var(--karta); border: 2px solid var(--ciara); }
+.nebezpecne { background: var(--karta); border: 2px solid var(--chyba-ram); color: var(--chyba-text); }
+.dvojica { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mriezka { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.dlazdica { background: var(--karta); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; text-align: left; padding: 14px 12px; min-height: 92px; font-size: 16px; }
+.dlazdica small { font-weight: 500; font-size: 12.5px; color: var(--tlmene); }
+
+.zoznam-obj { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.riadok-obj { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, .55); border-radius: 12px; padding: 10px 12px; margin: 0; font-weight: 400; }
+.riadok-obj input { width: 24px; height: 24px; accent-color: var(--hlava); }
+
+.kroky { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.kroky span { text-align: center; font-size: 12px; font-weight: 700; padding: 6px 0; border-radius: 999px; background: var(--pozadie); color: var(--tlmene); }
+.kroky span.aktivny { background: var(--hlava); color: #FFFFFF; }
+.kroky span.hotovy { background: var(--ok-poz); color: var(--ok-text); }
+.lokacia { font-size: 52px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.zobrat { display: flex; justify-content: space-between; align-items: center; background: var(--pozadie); border-radius: 14px; padding: 12px 14px; font-weight: 600; }
+.zobrat b { font-size: 30px; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.stepper b { font-size: 36px; min-width: 70px; text-align: center; }
+.krokove { width: 64px; background: var(--pozadie); border: 2px solid var(--ciara); font-size: 26px; }
+.riadok-pol { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 8px; align-items: center; }
+.riadok-pol label { margin: 0; }
+
+.hlasenie { border-radius: 14px; padding: 12px 14px; font-weight: 600; margin: 0; }
+.hlasenie.chyba { background: var(--chyba-poz); color: var(--chyba-text); }
+.hlasenie.ok { background: var(--ok-poz); color: var(--ok-text); }
+
+.dok {
+  background: var(--karta); border-top: 1px solid var(--ciara); display: flex; flex-direction: column; gap: 8px;
+  padding: 12px max(14px, env(safe-area-inset-right, 0px)) 12px max(14px, env(safe-area-inset-left, 0px));
+}
+.dok video { width: 100%; max-height: 32vh; object-fit: cover; border-radius: 16px; background: #000; }
+.dok-text { margin: 0; font-weight: 700; }
+.dok-riadok { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.dok-riadok button { min-height: 52px; border-radius: 14px; border: 0; padding: 0 16px; font-weight: 700; background: var(--hlava); color: #FFFFFF; }
+.dok-riadok .kamera-btn { grid-column: 1 / -1; background: var(--akcent); color: var(--akcent-text); min-height: 56px; font-size: 17px; }
+.ukazky { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--tlmene); }
+.ukazky:empty { display: none; }
+.ukazky button { border: 1px dashed var(--ciara); background: transparent; border-radius: 999px; padding: 6px 10px; font-family: var(--mono); font-size: 13px; }
+
+.lista {
+  display: grid; grid-template-columns: repeat(3, 1fr); background: var(--karta); border-top: 1px solid var(--ciara);
+  padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+}
+.lista button { background: none; border: 0; display: grid; justify-items: center; gap: 2px; font-size: 12px; color: var(--tlmene); min-height: 52px; }
+.lista button[aria-current="true"] { color: var(--akcent-tmavy); font-weight: 700; }
+.lista svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+body.zaneprazdneny { cursor: progress; }
+@media (prefers-reduced-motion: reduce) { .progres i { transition: none; } }
